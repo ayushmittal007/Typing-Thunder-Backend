@@ -2,13 +2,6 @@ const Sequelize = require('sequelize');
 const pg = require('pg');
 require('dotenv').config();
 
-// const sequelize = new Sequelize(process.env.,{
-    // logging:false
-// });
-
-// const sequelize = new Sequelize(process.env.DATABASE_URL,{
-    // logging:false
-// });
 
 const sequelize = new Sequelize(
     process.env.DATABASE_NAME,
@@ -21,6 +14,15 @@ const sequelize = new Sequelize(
     }
   );
   
+sequelize
+.authenticate()
+.then(() => {
+console.log('Connection to the database has been established successfully.');
+})
+.catch((err) => {
+console.error('Unable to connect to the database:', err);
+});
+
 module.exports = {
     sequelize
 };
