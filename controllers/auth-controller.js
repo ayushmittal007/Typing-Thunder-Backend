@@ -11,7 +11,6 @@ const { sendmail } = require("../utils/send_mail");
 const { ErrorHandler } = require("../middlewares/errorHandling");
 const { authSchema , newSchema } = require("../utils/joi_validations");
 
-
 const createAccessToken = ( payload ) => {
   return jwt.sign(payload, process.env.JWT_ACCESS_KEY, {
     expiresIn: process.env.JWT_ACCESS_EXP,
@@ -35,7 +34,7 @@ const refreshAccessToken = async (req, res, next) => {
     if(!payload) {
       return next(new ErrorHandler(400, "Invalid Refresh Token"));
     }
-
+    
     payload.shortId = shortid.generate();
     await User.update(
       { shortId: payload.shortId },
@@ -101,8 +100,7 @@ const signUp = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: "Sign up successful! Please verify your account using the OTP sent to your email",
-      data: { username, email }
+      message: "Sign up successful! Please verify your account using the OTP sent to your email"
     });
   } catch (err) {
     next(err);
@@ -137,10 +135,6 @@ const emailVerification = async (req, res, next) => {
 
     const accesstoken = createAccessToken(payload);
     const refreshtoken = createRefreshToken(payload);
-    
-    // const token = jwt.sign(payload, process.env.USER_KEY, {
-    //   expiresIn: "2d",
-    // });
 
     res.status(200).json({ success: true, message: "Email Verified", data: {
        "accesstoken" : accesstoken, 
@@ -185,10 +179,6 @@ const signIn = async (req, res, next) => {
 
     const accesstoken = createAccessToken(payload);
     const refreshtoken = createRefreshToken(payload);
-
-    // const token = jwt.sign(payload, process.env.USER_KEY, {
-      // expiresIn: "2d",
-    // });
 
     res.json({
       success: true,
