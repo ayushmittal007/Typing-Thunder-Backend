@@ -26,6 +26,26 @@ const updateUsername = async (req, res, next) => {
     }
 }
 
+const getUser = async (req, res, next) => {
+    try{
+        const id = req.user._id;
+        console.log(User);
+        const user = await User.findOne({where : { _id : id }});
+        if(user){
+            res.status(200).json({
+                success : true,
+                message : "User found",
+                data : user
+            })
+        }else{
+            return next (new ErrorHandler(400 , "No user found"));
+        }
+    }catch(err){
+        next(err)
+    }
+}
+
 module.exports = {
-    updateUsername
+    updateUsername,
+    getUser
 }
