@@ -15,15 +15,15 @@ const auth = async (req, res, next) => {
     if (!verified) {
       return next(new ErrorHandler(400, 'Token verification failed, access denied.'));
     }
-    console.log('Verified Token:', verified);
-    const userId = parseInt(verified.id, 10);
+    console.log('Verified Token:', verified.payload.id);
+    const userId = parseInt(verified.payload.id, 10);
     const user = await User.findByPk(userId);
     
     if (!user) {
       return next(new ErrorHandler(400, 'No user found with this token.'));
     }
 
-    if (user.shortId !== verified.unique_identifier) {
+    if (user.shortId !== verified.payload.unique_identifier) {
       return next(new ErrorHandler(400, 'Invalid token.'));
     }
 

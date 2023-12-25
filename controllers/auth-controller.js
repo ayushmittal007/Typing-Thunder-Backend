@@ -35,16 +35,6 @@ const refreshAccessToken = async (req, res, next) => {
       return next(new ErrorHandler(400, "Invalid Refresh Token"));
     }
     
-    payload.shortId = shortid.generate();
-    await User.update(
-      { shortId: payload.shortId },
-      {
-        where: {
-          _id: payload.id,
-        },
-      }
-    );
-
     const accesstoken = createAccessToken({ payload });
     return res.status(200).json({ suucces : true ,  data : { accesstoken } });
 
@@ -315,12 +305,12 @@ const changePassword = async (req, res, next) => {
 
     const hashedPassword = await bcryptjs.hash(newPassword, 6);
     const shortId = shortid.generate();
-
+    console.log(verified.id);
     await User.update(
       { shortId: shortId, password: hashedPassword },
       {
         where: {
-          id: verified.id,
+          _id: verified.id,
         },
       }
     );
