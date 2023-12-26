@@ -10,6 +10,7 @@ const { User , Otp } = require("../models");
 const { sendmail } = require("../utils/send_mail");
 const { ErrorHandler } = require("../middlewares/errorHandling");
 const { authSchema , newSchema } = require("../utils/joi_validations");
+const { getGoogleOauthToken, getGoogleUser } = require("../config/oauth_config");
 
 const createAccessToken = ( payload ) => {
   return jwt.sign(payload, process.env.JWT_ACCESS_KEY, {
@@ -321,6 +322,68 @@ const changePassword = async (req, res, next) => {
   }
 };
 
+const googleLogin = async (req , res , next) => {
+  const { CLIENT_ID, REDIRECT_URI } = process.env;
+  const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=email%20profile`;
+  res.redirect(authUrl);
+} 
+
+const googleOauthHandler = async (req, res, next) => {
+  try {
+    const code = req.query.code;
+
+    if (!code) {
+      return next(new ErrorHandler(500, 'Code not provided'));
+    }
+
+    const { id_token, access_token } = await getGoogleOauthToken({ code });
+
+    const { name, verified_email, email, picture } = await getGoogleUser({
+      id_token,
+      access_token,
+    });
+
+    if (!verified_email) {
+      return next(new ErrorHandler(500, 'Google account not verified'));
+    }
+
+    let payload;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      const newUser = new User({
+        email,
+        username : name,
+        password : null,
+        shortId: shortid.generate(),
+        isVerified: true,
+      });
+      await newUser.save();
+      payload = {
+        id: newUser._id,
+        unique_identifier: user.shortId,
+      };
+    } else {
+      user.email = email;
+      user.isVerified = true;
+      await user.save();
+      payload = {
+        id: user._id,
+        unique_identifier: user.shortId,
+      };
+    }
+    
+    const accessToken = createAccessToken(payload);
+    const refreshToken = createRefreshToken(payload);
+    console.log('Access Token:', accessToken);
+    console.log('Refresh Token:', refreshToken);
+    res.redirect(`/api/user/get-user?token=${accessToken}`);
+
+  } catch (err) {
+    console.log('Failed to authorize Google User', err);
+    return next(new ErrorHandler(500, 'Internal Server Error'));
+  }
+};
+
 module.exports = {
     signUp,
     emailVerification,
@@ -329,5 +392,7 @@ module.exports = {
     verifyOtp,
     resendOtp,
     changePassword,
-    refreshAccessToken
+    refreshAccessToken,
+    googleLogin,
+    googleOauthHandler
 }

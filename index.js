@@ -20,10 +20,8 @@ app.use(errorMiddleware);
 const { sequelize } = require("./config/database");
 
 const { authRouter , userRouter } = require("./routes");
-const router  = require("./config/oauth_config");
 app.use("/api/auth", authRouter, errorMiddleware);
 app.use("/api/user", userRouter, errorMiddleware);
-app.use("/api/gauth", router, errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 

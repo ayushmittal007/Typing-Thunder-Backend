@@ -3,7 +3,7 @@ const { User } = require('../models');
 const { ErrorHandler } = require('../middlewares/errorHandling');
 
 const auth = async (req, res, next) => {
-  const token = req.header('auth-token') || req.query.authToken;;
+  const token = req.header('auth-token') || req.query.token;
   console.log('Auth Token:', token);
   try {
     if (!token) {
@@ -15,15 +15,15 @@ const auth = async (req, res, next) => {
     if (!verified) {
       return next(new ErrorHandler(400, 'Token verification failed, access denied.'));
     }
-    console.log('Verified Token:', verified.payload.id);
-    const userId = parseInt(verified.payload.id, 10);
+    console.log('Verified Token:', verified);
+    const userId = parseInt(verified.id || verified.payload.id, 10);
     const user = await User.findByPk(userId);
     
     if (!user) {
       return next(new ErrorHandler(400, 'No user found with this token.'));
     }
-
-    if (user.shortId !== verified.payload.unique_identifier) {
+    const unique_identifier = verified.unique_identifier || verified.payload.unique_identifier;
+    if (user.shortId !== unique_identifier) {
       return next(new ErrorHandler(400, 'Invalid token.'));
     }
 
