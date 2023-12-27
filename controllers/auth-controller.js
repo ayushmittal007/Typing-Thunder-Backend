@@ -360,7 +360,7 @@ const googleOauthHandler = async (req, res, next) => {
       await newUser.save();
       payload = {
         id: newUser._id,
-        unique_identifier: user.shortId,
+        unique_identifier: newUser.shortId,
       };
     } else {
       user.email = email;
@@ -376,8 +376,7 @@ const googleOauthHandler = async (req, res, next) => {
     const refreshToken = createRefreshToken(payload);
     console.log('Access Token:', accessToken);
     console.log('Refresh Token:', refreshToken);
-    res.redirect(`/api/user/get-user?token=${accessToken}`);
-
+    res.status(200).json({ success: true, data: { accessToken, refreshToken } });
   } catch (err) {
     console.log('Failed to authorize Google User', err);
     return next(new ErrorHandler(500, 'Internal Server Error'));
