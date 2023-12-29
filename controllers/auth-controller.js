@@ -390,10 +390,11 @@ const googleLogin = async (req , res , next) => {
 const googleOauthHandler = async (req, res, next) => {
   try {
     console.log('Google OAuth Handler');
+    console.log(req.query.code);
     const code = req.query.code;
 
     if (!code) {
-      return next(new ErrorHandler(500, 'Code not provided'));
+      return next(new ErrorHandler(500, 'Authentication Failed'));
     }
 
     const { id_token, access_token } = await getGoogleOauthToken({ code });
@@ -410,6 +411,7 @@ const googleOauthHandler = async (req, res, next) => {
     let payload;
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
+      console.log('Creating new user');
       const newUser = new User({
         email,
         username : name,
@@ -423,6 +425,7 @@ const googleOauthHandler = async (req, res, next) => {
         unique_identifier: newUser.shortId,
       };
     } else {
+      console.log('User already exists');
       user.email = email;
       user.isVerified = true;
       await user.save();
