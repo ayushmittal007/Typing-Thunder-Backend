@@ -5,7 +5,8 @@ const { auth } = require("googleapis/build/src/apis/abusiveexperiencereport");
 
 authRouter.post("/sign-up", authController.signUp);
 authRouter.post("/email-verification",authController.emailVerification);
-authRouter.post("/sign-in", authController.signIn);
+authRouter.post("/sign-in/email", authController.signInWithEmail);
+authRouter.post("/sign-in/username", authController.signInWithUsername);
 authRouter.post("/forget-password", authController.forgetPassword);
 authRouter.post("/verify-otp", authController.verifyOtp);
 authRouter.post("/resend-otp", authController.resendOtp);

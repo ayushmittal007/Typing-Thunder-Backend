@@ -137,7 +137,7 @@ const emailVerification = async (req, res, next) => {
   }
 };
 
-const signIn = async (req, res, next) => {
+const signInWithEmail = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
@@ -186,6 +186,55 @@ const signIn = async (req, res, next) => {
     next(err);
   }
 };
+
+const signInWithUsername = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ where: { username: username } });
+    if (!user) {
+      return next(new ErrorHandler(400, "No user exists with this email"));
+    }
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+
+    if (!isMatch) {
+      return next(new ErrorHandler(400, "Invalid Credentials!"));
+    }
+
+    if (!user.isVerified) {
+      return next(new ErrorHandler(400, "Email is not verified"));
+    }
+
+    const shortId = shortid.generate();
+    await user.update(
+      { shortId: shortId },
+      {
+         where: { username : username }
+      }
+    );
+    const payload = {
+      id: user._id,
+      unique_identifier: shortId,
+    };
+
+    const accesstoken = createAccessToken(payload);
+    const refreshtoken = createRefreshToken(payload);
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      data: {
+        "accesstoken" : accesstoken,
+        "refreshtoken" : refreshtoken,
+        username: user.username,
+        email,
+        isVerified: user.isVerified
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 const forgetPassword = async (req, res, next) => {
   try {
@@ -386,7 +435,8 @@ const googleOauthHandler = async (req, res, next) => {
 module.exports = {
     signUp,
     emailVerification,
-    signIn,
+    signInWithEmail,
+    signInWithUsername,
     forgetPassword,
     verifyOtp,
     resendOtp,
