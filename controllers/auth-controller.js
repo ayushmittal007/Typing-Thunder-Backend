@@ -61,7 +61,7 @@ const signUp = async (req, res, next) => {
 
     const hashedPassword = await bcryptjs.hash(password, 6);
 
-    let existingEmail = await User.findOne({ where: { email: email.toLowerCase() } });
+    const existingEmail = await User.findOne({ where: { email: email.toLowerCase() } });
 
     if (existingEmail) {
       if (!existingEmail.isVerified) {
@@ -74,7 +74,7 @@ const signUp = async (req, res, next) => {
         return next(new ErrorHandler(400, "User with this email already exists"));
       }
     } else {
-      let existingUsername = await User.findOne({ where: { username: username } });
+      const existingUsername = await User.findOne({ where: { username: username } });
       if (existingUsername) {
         return next(new ErrorHandler(400, "This username already exists"));
       }
@@ -83,7 +83,7 @@ const signUp = async (req, res, next) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    let oldOTP = await Otp.findOne({ where: { email: email.toLowerCase() } });
+    const oldOTP = await Otp.findOne({ where: { email: email.toLowerCase() } });
 
     if (oldOTP) {
       console.log("old otp");
@@ -112,7 +112,7 @@ const emailVerification = async (req, res, next) => {
     const { email, otp } = req.body;
     console.log(otp);
     console.log(email);
-    let OTP = await Otp.findOne({ where: { email: email } });
+    const OTP = await Otp.findOne({ where: { email: email } });
     console.log(OTP);
     if (otp !== OTP?.otp) {
       return next(new ErrorHandler(400, "Invalid OTP"));
@@ -247,7 +247,7 @@ const forgetPassword = async (req, res, next) => {
   try {
     const input = await forgetPasswordSchema.validateAsync(req.body);
     const { email } = req.body;
-    let user = await User.findOne({ where: { email: email.toLowerCase() } });
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
 
     if (!user) {
       return next(new ErrorHandler(400, "No user exists with this email"));
@@ -258,7 +258,7 @@ const forgetPassword = async (req, res, next) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
-    let existingOtp = await Otp.findOne({ where: { email: email.toLowerCase() } });
+    const existingOtp = await Otp.findOne({ where: { email: email.toLowerCase() } });
 
     if (existingOtp) {
       await existingOtp.update({ otp: otp, otpCreatedAt : Date.now() });
@@ -277,7 +277,7 @@ const resendOtp = async (req, res, next) => {
   try {
     const input = await forgetPasswordSchema.validateAsync(req.body);
     const { email } = req.body;
-    let user = await User.findOne({ where: { email: email.toLowerCase() } });
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
 
     if (!user) {
       return next(new ErrorHandler(400, "No user exists with this email"));
@@ -311,7 +311,7 @@ const verifyOtp = async (req, res, next) => {
   try {
     const input = await emailVerificationSchema.validateAsync(req.body);
     const { email, otp } = req.body;
-    let OTP = await Otp.findOne({ where: { email: email.toLowerCase() } });
+    const OTP = await Otp.findOne({ where: { email: email.toLowerCase() } });
 
     if (otp !== OTP?.otp) {
       return next(new ErrorHandler(400, "Invalid otp"));
@@ -331,7 +331,7 @@ const verifyOtp = async (req, res, next) => {
       }
     );
 
-    let user = await User.findOne({ where: { email: email.toLowerCase() } });
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
 
     const token = jwt.sign({ id: user._id }, process.env.RESET_KEY, {
       expiresIn: 300,
@@ -349,14 +349,14 @@ const changePassword = async (req, res, next) => {
     const email = input.email;
     const newPassword = input.newPassword;
 
-    let user = await User.findOne({ where: { email: email.toLowerCase() } });
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
     const isMatch = await bcryptjs.compare(newPassword, user.password);
 
     if (isMatch) {
       return next(new ErrorHandler(400, "Please Change The Password!"));
     }
 
-    let token = req.header("verify-token");
+    const token = req.header("verify-token");
     const verified = jwt.verify(token, process.env.RESET_KEY);
 
     if (!verified) {
@@ -389,6 +389,7 @@ const googleLogin = async (req , res , next) => {
 
 const googleOauthHandler = async (req, res, next) => {
   try {
+    console.log('Google OAuth Handler');
     const code = req.query.code;
 
     if (!code) {
@@ -407,7 +408,7 @@ const googleOauthHandler = async (req, res, next) => {
     }
 
     let payload;
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
       const newUser = new User({
         email,
