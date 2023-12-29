@@ -9,7 +9,15 @@ require("dotenv").config();
 const { User , Otp } = require("../models");
 const { sendmail } = require("../utils/send_mail");
 const { ErrorHandler } = require("../middlewares/errorHandling");
-const { authSchema , newSchema } = require("../utils/joi_validations");
+const { 
+    signUpSchema ,
+    emailVerificationSchema ,
+    signInWithEmailSchema ,
+    signInWithUsernameSchema ,
+    forgetPasswordSchema,
+    newPasswordSchema,
+   } = require("../utils/joi_validations");
+   
 const { getGoogleOauthToken, getGoogleUser } = require("../config/oauth_config");
 
 const createAccessToken = ( payload ) => {
@@ -46,7 +54,7 @@ const refreshAccessToken = async (req, res, next) => {
 
 const signUp = async (req, res, next) => {
   try {
-    const input = await authSchema.validateAsync(req.body);
+    const input = await signUpSchema.validateAsync(req.body);
     const username = input.username;
     const email = input.email;
     const password = input.password;
@@ -100,6 +108,7 @@ const signUp = async (req, res, next) => {
 
 const emailVerification = async (req, res, next) => {
   try {
+    const input = await emailVerificationSchema.validateAsync(req.body);
     const { email, otp } = req.body;
     console.log(otp);
     console.log(email);
@@ -139,6 +148,7 @@ const emailVerification = async (req, res, next) => {
 
 const signInWithEmail = async (req, res, next) => {
   try {
+    const input = await signInWithEmailSchema.validateAsync(req.body);
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
 
@@ -177,9 +187,7 @@ const signInWithEmail = async (req, res, next) => {
       data: {
         "accesstoken" : accesstoken,
         "refreshtoken" : refreshtoken,
-        username: user.username,
-        email,
-        isVerified: user.isVerified
+        email
       },
     });
   } catch (err) {
@@ -189,6 +197,7 @@ const signInWithEmail = async (req, res, next) => {
 
 const signInWithUsername = async (req, res, next) => {
   try {
+    const input = await signInWithUsernameSchema.validateAsync(req.body);
     const { username, password } = req.body;
     const user = await User.findOne({ where: { username: username } });
     if (!user) {
@@ -226,9 +235,7 @@ const signInWithUsername = async (req, res, next) => {
       data: {
         "accesstoken" : accesstoken,
         "refreshtoken" : refreshtoken,
-        username: user.username,
-        email,
-        isVerified: user.isVerified
+        username: user.username
       },
     });
   } catch (err) {
@@ -238,6 +245,7 @@ const signInWithUsername = async (req, res, next) => {
 
 const forgetPassword = async (req, res, next) => {
   try {
+    const input = await forgetPasswordSchema.validateAsync(req.body);
     const { email } = req.body;
     let user = await User.findOne({ where: { email: email.toLowerCase() } });
 
@@ -267,6 +275,7 @@ const forgetPassword = async (req, res, next) => {
 
 const resendOtp = async (req, res, next) => {
   try {
+    const input = await forgetPasswordSchema.validateAsync(req.body);
     const { email } = req.body;
     let user = await User.findOne({ where: { email: email.toLowerCase() } });
 
@@ -300,6 +309,7 @@ const resendOtp = async (req, res, next) => {
 
 const verifyOtp = async (req, res, next) => {
   try {
+    const input = await emailVerificationSchema.validateAsync(req.body);
     const { email, otp } = req.body;
     let OTP = await Otp.findOne({ where: { email: email.toLowerCase() } });
 
@@ -335,7 +345,7 @@ const verifyOtp = async (req, res, next) => {
 
 const changePassword = async (req, res, next) => {
   try {
-    const input = await newSchema.validateAsync(req.body);
+    const input = await newPasswordSchema.validateAsync(req.body);
     const email = input.email;
     const newPassword = input.newPassword;
 
