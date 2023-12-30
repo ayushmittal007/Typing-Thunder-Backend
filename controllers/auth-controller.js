@@ -412,11 +412,12 @@ const googleOauthHandler = async (req, res, next) => {
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
       console.log('Creating new user');
+      const shortId = shortid.generate();
       const newUser = new User({
         email,
-        username : name,
+        username : name + shortId,
         password : null,
-        shortId: shortid.generate(),
+        shortId: shortId,
         isVerified: true,
       });
       await newUser.save();
