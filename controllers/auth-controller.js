@@ -35,16 +35,17 @@ const createRefreshToken = ( payload ) => {
 const refreshAccessToken = async (req, res, next) => {
   try {
     const refreshtoken = req.body.refreshtoken;
-    if (!refreshtoken)
+    if (!refreshtoken){
       return next(new ErrorHandler(400, "Please Login or Register"));
-
+    }
+    
     const payload = jwt.verify(refreshtoken, process.env.JWT_REFRESH_KEY);
 
     if(!payload) {
       return next(new ErrorHandler(400, "Invalid Refresh Token"));
     }
     
-    const accesstoken = createAccessToken({ payload });
+    const accesstoken = createAccessToken(payload);
     return res.status(200).json({ suucces : true ,  data : { accesstoken } });
 
   } catch (err) {
@@ -343,6 +344,34 @@ const verifyOtp = async (req, res, next) => {
   }
 };
 
+const continueWithoutChangingPassword = async (req, res, next) => {
+  try {
+    const input = await emailVerificationSchema.validateAsync(req.body);
+    const email = input.email;
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
+    if(!user){
+      return next(new ErrorHandler(400, "No user exists with this email"));
+    }
+
+    const token = req.header("verify-token");
+    const verified = jwt.verify(token, process.env.RESET_KEY);
+    if (!verified) {
+      return next(new ErrorHandler(400, "Please verify otp first"));
+    }
+
+    const shortId = user.shortId;
+    const payload = {
+      id: user._id,
+      unique_identifier: shortId,
+    };
+    const accesstoken = createAccessToken(payload);
+    const refreshtoken = createRefreshToken(payload);
+    res.json({ success: true, message: "Login Successfull", data: { accesstoken, refreshtoken } });
+  }catch(err){
+    next(err);
+  }
+}
+
 const changePassword = async (req, res, next) => {
   try {
     const input = await newPasswordSchema.validateAsync(req.body);
@@ -455,6 +484,7 @@ module.exports = {
     forgetPassword,
     verifyOtp,
     resendOtp,
+    continueWithoutChangingPassword,
     changePassword,
     refreshAccessToken,
     googleLogin,
