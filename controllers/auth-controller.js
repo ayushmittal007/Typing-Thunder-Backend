@@ -346,7 +346,7 @@ const verifyOtp = async (req, res, next) => {
 
 const continueWithoutChangingPassword = async (req, res, next) => {
   try {
-    const input = await emailVerificationSchema.validateAsync(req.body);
+    const input = await forgetPasswordSchema.validateAsync(req.body);
     const email = input.email;
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
     if(!user){
