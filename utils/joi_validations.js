@@ -15,16 +15,12 @@ const emailVerificationSchema = Joi.object({
 
 const signInWithEmailSchema = Joi.object({
   email: Joi.string().email().lowercase().trim().required(),
-  password: Joi.string().min(6)
-  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*[0-9]).{6,}$"))
-  .required(),
+  password: Joi.string().min(6).required(),
 });
 
 const signInWithUsernameSchema = Joi.object({
   username: Joi.string().min(4).trim().required(),
-  password: Joi.string().min(6)
-  .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*[0-9]).{6,}$"))
-  .required(),
+  password: Joi.string().min(6).required(),
 });
 
 const forgetPasswordSchema = Joi.object({

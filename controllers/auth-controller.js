@@ -202,7 +202,7 @@ const signInWithUsername = async (req, res, next) => {
     const { username, password } = req.body;
     const user = await User.findOne({ where: { username: username } });
     if (!user) {
-      return next(new ErrorHandler(400, "No user exists with this email"));
+      return next(new ErrorHandler(400, "No user exists with this username"));
     }
 
     const isMatch = await bcryptjs.compare(password, user.password);
@@ -445,7 +445,7 @@ const googleOauthHandler = async (req, res, next) => {
       const newUser = new User({
         email,
         username : name + shortId,
-        password : null,
+        password : shortId,
         shortId: shortId,
         isVerified: true,
       });
