@@ -158,7 +158,7 @@ const signInWithEmail = async (req, res, next) => {
     }
 
     if (!user.isVerified) {
-      return next(new ErrorHandler(400, "Email is not verified"));
+      return next(new ErrorHandler(400, "No user exists with this email"));
     }
 
     const isMatch = await bcryptjs.compare(password, user.password);
@@ -204,14 +204,14 @@ const signInWithUsername = async (req, res, next) => {
       return next(new ErrorHandler(400, "No user exists with this username"));
     }
 
+    if (!user.isVerified) {
+      return next(new ErrorHandler(400, "No user exists with this username"));
+    }
+    
     const isMatch = await bcryptjs.compare(password, user.password);
 
     if (!isMatch) {
       return next(new ErrorHandler(400, "Invalid Credentials!"));
-    }
-
-    if (!user.isVerified) {
-      return next(new ErrorHandler(400, "Email is not verified"));
     }
 
     const shortId = shortid.generate();
@@ -254,7 +254,7 @@ const forgetPassword = async (req, res, next) => {
     }
 
     if (!user.isVerified) {
-      return next(new ErrorHandler(400, "Email is not verified"));
+      return next(new ErrorHandler(400, "No user exists with this email"));
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
