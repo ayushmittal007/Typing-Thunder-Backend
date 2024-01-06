@@ -403,8 +403,10 @@ const changePassword = async (req, res, next) => {
         },
       }
     );
+    const accesstoken = createAccessToken(payload);
+    const refreshtoken = createRefreshToken(payload);
 
-    res.json({ success: true, message: "password changed", data: user });
+    res.json({ success: true, message: "password changed", data: {accesstoken , refreshtoken}});
   } catch (err) {
     next(err);
   }
