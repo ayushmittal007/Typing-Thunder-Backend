@@ -267,7 +267,7 @@ const forgetPassword = async (req, res, next) => {
       await Otp.create({ email: email, otp: otp, otpCreatedAt : Date.now() });
     }
 
-    sendmail(email, otp);
+    sendmail(email, otp, "Email Verification");
     res.json({ success: true, message: "Otp is sent to your registered email" });
   } catch (err) {
     next(err);
@@ -297,7 +297,7 @@ const resendOtp = async (req, res, next) => {
       await Otp.create({ email: email, otp: otp, createdAt: Date.now() });
     }
 
-    sendmail(email, otp, "Reset Password");
+    sendmail(email, otp, "Email Verification");
 
     res.json({
       success: true,
