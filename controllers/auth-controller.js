@@ -402,6 +402,10 @@ const changePassword = async (req, res, next) => {
         },
       }
     );
+    const payload = {
+      id: verified.id,
+      unique_identifier: shortId,
+    }
     const accesstoken = createAccessToken(payload);
     const refreshtoken = createRefreshToken(payload);
 
