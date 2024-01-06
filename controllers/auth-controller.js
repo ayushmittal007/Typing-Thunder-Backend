@@ -157,14 +157,13 @@ const signInWithEmail = async (req, res, next) => {
       return next(new ErrorHandler(400, "No user exists with this email"));
     }
 
-    const isMatch = await bcryptjs.compare(password, user.password);
-
-    if (!isMatch) {
-      return next(new ErrorHandler(400, "Invalid Credentials!"));
-    }
-
     if (!user.isVerified) {
       return next(new ErrorHandler(400, "Email is not verified"));
+    }
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      return next(new ErrorHandler(400, "Invalid Credentials!"));
     }
 
     const shortId = shortid.generate();
