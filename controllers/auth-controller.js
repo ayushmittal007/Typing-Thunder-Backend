@@ -76,7 +76,7 @@ const signUp = async (req, res, next) => {
       }
     } else {
       const existingUsername = await User.findOne({ where: { username: username } });
-      if (existingUsername.isVerified) {
+      if (existingUsername && existingUsername.isVerified) {
         return next(new ErrorHandler(400, "This username already exists"));
       }
       await User.create({ username: username, password: hashedPassword, email: email });
