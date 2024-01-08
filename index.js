@@ -19,9 +19,14 @@ app.use(errorMiddleware);
 
 const { sequelize } = require("./config/database");
 
-const { authRouter , userRouter } = require("./routes");
+const { authRouter , userRouter , GoogleAuthRouter } = require("./routes");
+
 app.use("/api/auth", authRouter, errorMiddleware);
 app.use("/api/user", userRouter, errorMiddleware);
+app.use("/api/google", (req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+}, GoogleAuthRouter, errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 

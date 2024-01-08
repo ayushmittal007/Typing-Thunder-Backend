@@ -12,7 +12,5 @@ authRouter.post("/resend-otp", authController.resendOtp);
 authRouter.post("/continue-without-changing-password", authController.continueWithoutChangingPassword);
 authRouter.post("/change-password", authController.changePassword);
 authRouter.post("/refresh-access-token", authController.refreshAccessToken);
-authRouter.get("/google/login" , authController.googleLogin);
-authRouter.get("/google/auth" , authController.googleOauthHandler);
 
 module.exports = authRouter;
