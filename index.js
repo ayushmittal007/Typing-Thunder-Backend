@@ -49,13 +49,17 @@ app.post('/analyze', (req, res) => {
   const result = sentiment.analyze(text);
   let ans ;
   console.log(result);
-  if(result.score > 0){
-    ans = "Happy"
-  }else if(result.score < 0){
-    ans = "Sad";
+  if(result.score > 2){
+    ans = "Much Happy"
   }
-  else if(result.score > 2){
-    ans  = "too Happy";
+  else if(result.score > 0){
+    ans  = "Happy";
+  }
+  else if(score < 3){
+    ans = "Much Sad";
+  }
+  else if(result.score < 0){
+    ans = "Sad";
   }
   else{
     ans = "Neutral";
