@@ -30,6 +30,7 @@ app.use("/api/google", (req, res, next) => {
   next();
 }, GoogleAuthRouter, errorMiddleware);
 
+const axios = require("axios");
 const bodyParser = require('body-parser');
 const Sentiment = require('sentiment');
 
@@ -46,15 +47,32 @@ app.post('/analyze', (req, res) => {
 
   const sentiment = new Sentiment();
   const result = sentiment.analyze(text);
+  let ans ;
+  console.log(result);
+  if(result.score > 0){
+    ans = "Happy"
+  }else if(result.score < 0){
+    ans = "Sad";
+  }
+  else if(result.score > 2){
+    ans  = "too Happy";
+  }
+  else{
+    ans = "Neutral";
+  }
 
-  res.json({ sentiment: result });
+  res.json({ sentiment: ans });
 });
 
-// Start the server
-// app.listen(PORT, () => {
-//   console.log(`Server is running on http://localhost:${PORT}`);
-// });
+// axios.post('https://oauth-typing.onrender.com/analyze', requestData)
+//   .then(response => {
+//     console.log('API Response:', response.data);
+//   })
+//   .catch(error => {
+//     console.error('Error fetching data:', error);
+//   });
 
+  // console.log("Hello world");
 const connectDB = async () => {
   try {
       const result = await sequelize.sync();
