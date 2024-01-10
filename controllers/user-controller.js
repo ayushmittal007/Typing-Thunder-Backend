@@ -45,7 +45,40 @@ const getUser = async (req, res, next) => {
     }
 }
 
+// const analyzer = async (req, res, next) => {
+
+
 module.exports = {
     updateUsername,
     getUser
 }
+
+
+// const express = require('express');
+// const bodyParser = require('body-parser');
+// const Sentiment = require('sentiment');
+
+// const app = express();
+// const port = 3000;
+
+// // Middleware to parse JSON requests
+// app.use(bodyParser.json());
+
+// // Endpoint for sentiment analysis
+// app.post('/analyze', (req, res) => {
+//   const { text } = req.body;
+
+//   if (!text) {
+//     return res.status(400).json({ error: 'Text is required in the request body' });
+//   }
+
+//   const sentiment = new Sentiment();
+//   const result = sentiment.analyze(text);
+
+//   res.json({ sentiment: result });
+// });
+
+// // Start the server
+// app.listen(port, () => {
+//   console.log(Server is running on http://localhost:${port});
+// });
