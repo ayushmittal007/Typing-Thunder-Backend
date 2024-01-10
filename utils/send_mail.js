@@ -7,7 +7,7 @@ const sendmail = async (email,otp,topic) => {
         to: email,
         subject: topic,
         html: 
-        ` <p style="margin-bottom: 30px;"> We are thrilled to have you on Typing Thunder ! To verify your identity , please use the following One-Time Password (OTP) code:
+        ` <p style="margin-bottom: 30px;"> We are thrilled to have you on DTect ! To verify your identity , please use the following One-Time Password (OTP) code:
           </p>
           <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center; color:green;">${otp}</h1>
           <p style="font-size: 10px;>Please do not share this OTP with anyone.
@@ -15,7 +15,7 @@ const sendmail = async (email,otp,topic) => {
           <p style="font-size: 10px;>If you did not request this OTP, please ignore this email.Thank you for choosing our service.
           </p>
         <p>
-          Thank you for choosing Typing Thunder. We are looking forward to make you better at typing.
+          Thank you for choosing Dtect.
         </p>`
       ,
     }

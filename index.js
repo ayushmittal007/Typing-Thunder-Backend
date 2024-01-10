@@ -50,7 +50,7 @@ app.post('/analyze', (req, res) => {
   let ans ;
   console.log(result);
   if(result.words.includes('fuck') || result.words.includes('kill') || result.words.includes('murder') || result.words.includes('angry')){
-    ans = "angry"
+    ans = "Angry"
   }
   else if(result.score > 2){
     ans = "Much Happy"
