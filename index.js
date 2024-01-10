@@ -49,7 +49,10 @@ app.post('/analyze', (req, res) => {
   const result = sentiment.analyze(text);
   let ans ;
   console.log(result);
-  if(result.score > 2){
+  if(result.words.includes('fuck') || result.words.includes('kill') || result.words.includes('murder') || result.words.includes('angry')){
+    ans = "angry"
+  }
+  else if(result.score > 2){
     ans = "Much Happy"
   }
   else if(result.score > 0){
