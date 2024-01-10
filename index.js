@@ -55,7 +55,7 @@ app.post('/analyze', (req, res) => {
   else if(result.score > 0){
     ans  = "Happy";
   }
-  else if(score < 3){
+  else if(result.score < 3){
     ans = "Much Sad";
   }
   else if(result.score < 0){
