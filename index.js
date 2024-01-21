@@ -28,8 +28,7 @@ app.use("/api/google", (req, res, next) => {
   next();
 }, GoogleAuthRouter, errorMiddleware);
 
-const User = require("./models/user");
-const Performance = require("./models/performance");
+const { User, Performance } = require("./models");
 
 User.hasMany(Performance, { as: 'performances' });
 Performance.belongsTo(User);

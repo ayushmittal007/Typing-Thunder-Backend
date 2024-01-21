@@ -78,26 +78,6 @@ const savePerformance = async (req, res, next) => {
     }
 }
 
-// const getPerformance = async (req, res, next) => {
-//     try{
-//         const id = req.user._id;
-//         const user = await User.findOne({where : { _id : id }});
-//         if(!user){
-//             return next (new ErrorHandler(400 , "No user found"));
-//         }
-//         console.log(user);
-//         console.log(user.username);
-//         console.log(user.performances);
-//         res.status(200).json({
-//             success : true,
-//             message : "Performance fetched successfully",
-//             data : user.performances
-//         })
-//     }catch(err){
-//         next(err)
-//     }
-// }
-
 const getPerformances = async (req, res, next) => {
     try {
         const userId = req.user._id;
@@ -110,7 +90,7 @@ const getPerformances = async (req, res, next) => {
         if(!performances){
             return next(new ErrorHandler(404, "No performances found"));
         }
-        
+
         res.status(200).json({
             success: true,
             performances,
