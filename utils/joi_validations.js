@@ -34,6 +34,17 @@ const newPasswordSchema = Joi.object({
   .required(),
 });
 
+const performanceSchema = Joi.object({
+  wpm : Joi.number().required(),
+  accuracy : Joi.number().required(),
+  timing : Joi.number().required(),
+  raw : Joi.number().required(),
+  correct : Joi.number().required(),
+  incorrect : Joi.number().required(),
+  extra : Joi.number().required(),
+  missed : Joi.number().required(),
+});
+
 module.exports = { 
     signUpSchema ,
     emailVerificationSchema ,
@@ -41,4 +52,5 @@ module.exports = {
     signInWithUsernameSchema ,
     forgetPasswordSchema ,
     newPasswordSchema ,
+    performanceSchema
 };
