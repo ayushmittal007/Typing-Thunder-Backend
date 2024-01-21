@@ -64,11 +64,35 @@ const savePerformance = async (req, res, next) => {
             extra : extra,
             missed : missed
         }
+        console.log(performance);
         user.performances.push(performance);
         await user.save();
+        console.log(user.performances);
+        console.log(user);
         res.status(200).json({
             success : true,
-            message : "Performance saved successfully"
+            message : "Performance saved successfully",
+            data : user.performances
+        })
+    }catch(err){
+        next(err)
+    }
+}
+
+const getPerformance = async (req, res, next) => {
+    try{
+        const id = req.user._id;
+        const user = await User.findOne({where : { _id : id }});
+        if(!user){
+            return next (new ErrorHandler(400 , "No user found"));
+        }
+        console.log(user);
+        console.log(user.username)
+        console.log(user.performances);
+        res.status(200).json({
+            success : true,
+            message : "Performance fetched successfully",
+            data : user.performances
         })
     }catch(err){
         next(err)
@@ -78,5 +102,6 @@ const savePerformance = async (req, res, next) => {
 module.exports = {
     updateUsername,
     getUser,
-    savePerformance
+    savePerformance,
+    getPerformance
 }
