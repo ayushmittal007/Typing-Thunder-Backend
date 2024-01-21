@@ -28,6 +28,12 @@ app.use("/api/google", (req, res, next) => {
   next();
 }, GoogleAuthRouter, errorMiddleware);
 
+const User = require("./models/user");
+const Performance = require("./models/performance");
+
+User.hasMany(Performance, { as: 'performances' });
+Performance.belongsTo(User);
+
 const PORT = process.env.PORT || 5000;
 const connectDB = async () => {
   try {

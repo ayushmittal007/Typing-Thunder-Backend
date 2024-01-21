@@ -28,10 +28,6 @@ const User = sequelize.define('user', {
     isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
-    },
-    performances : {
-        type : Sequelize.ARRAY(Sequelize.JSON),
-        defaultValue : []
     }
 });
 
