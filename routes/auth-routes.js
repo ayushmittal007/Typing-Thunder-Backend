@@ -12,5 +12,6 @@ authRouter.post("/resend-otp", authController.resendOtp);
 authRouter.post("/continue-without-changing-password", authController.continueWithoutChangingPassword);
 authRouter.post("/change-password", authController.changePassword);
 authRouter.post("/refresh-access-token", authController.refreshAccessToken);
+authRouter.post("/check-token",authController.isValidAceessToken);
 
 module.exports = authRouter;

@@ -415,6 +415,30 @@ const changePassword = async (req, res, next) => {
   }
 };
 
+const isValidAceessToken = async (req, res, next) => {
+  try {
+    const token = req.header("auth-token");
+    if (!token) {
+      return next(new ErrorHandler(400, "Please Login or Register"));
+    }
+    const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+    if (!verified) {
+      return next(new ErrorHandler(400, "Invalid Token"));
+    }
+    const user = await User.findOne({ where: { _id: verified.id } });
+    if (!user) {
+      return next(new ErrorHandler(400, "No user exists with this token"));
+    }
+    const unique_identifier = verified.unique_identifier;
+    if (user.shortId !== unique_identifier) {
+      return next(new ErrorHandler(400, "Invalid Token"));
+    }
+    res.json({ success: true, message: "Valid Token"});
+  } catch (err) {
+    next(err);
+  }
+};
+
 const googleLogin = async (req , res , next) => {
   const { CLIENT_ID, REDIRECT_URI } = process.env;
   const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=email%20profile`;
@@ -492,6 +516,7 @@ module.exports = {
     continueWithoutChangingPassword,
     changePassword,
     refreshAccessToken,
+    isValidAceessToken,
     googleLogin,
     googleOauthHandler
 }
