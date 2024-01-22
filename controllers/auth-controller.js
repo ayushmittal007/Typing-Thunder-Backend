@@ -39,12 +39,17 @@ const refreshAccessToken = async (req, res, next) => {
       return next(new ErrorHandler(400, "Please Login or Register"));
     }
     
-    const payload = jwt.verify(refreshtoken, process.env.JWT_REFRESH_KEY);
+    let payload = jwt.verify(refreshtoken, process.env.JWT_REFRESH_KEY);
 
     if(!payload) {
       return next(new ErrorHandler(400, "Invalid Refresh Token"));
     }
-    
+    console.log(payload);
+    payload = {
+      id: payload.id,
+      unique_identifier: payload.unique_identifier,
+    };
+    console.log(payload);
     const accesstoken = createAccessToken(payload);
     return res.status(200).json({ suucces : true ,  data : { accesstoken } });
 
