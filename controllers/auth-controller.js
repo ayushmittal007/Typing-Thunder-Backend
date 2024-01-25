@@ -128,6 +128,9 @@ const emailVerification = async (req, res, next) => {
     }
 
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
+    if(!user){
+      return next(new ErrorHandler(400, "No user exists with this email"));
+    }
     user.isVerified = true;
     await user.save();
 
@@ -337,6 +340,9 @@ const verifyOtp = async (req, res, next) => {
     );
 
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
+    if(!user){
+      return next(new ErrorHandler(400, "No user exists with this email"));
+    }
 
     const token = jwt.sign({ id: user._id }, process.env.RESET_KEY, {
       expiresIn: 300,
@@ -383,6 +389,9 @@ const changePassword = async (req, res, next) => {
     const newPassword = input.newPassword;
 
     const user = await User.findOne({ where: { email: email.toLowerCase() } });
+    if(!user){
+      return next(new ErrorHandler(400, "No user exists with this email"));
+    }
     const isMatch = await bcryptjs.compare(newPassword, user.password);
 
     if (isMatch) {

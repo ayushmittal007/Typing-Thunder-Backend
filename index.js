@@ -61,6 +61,7 @@ io.on("connection", (socket) => {
       numberOfPeople: 1,
     });
     const user = await User.findByPk(userId);
+
     // await user.setRoom(room);
     socket.join(room.roomCode);
     socket.emit("room-created", room.roomCode);
