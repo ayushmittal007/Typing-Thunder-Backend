@@ -9,10 +9,6 @@ const Room = sequelize.define('room', {
         allowNull: false,
         primaryKey: true
     },
-    roomName : {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
     roomCode : {
         type: Sequelize.STRING,
         defaultValue: shortId.generate

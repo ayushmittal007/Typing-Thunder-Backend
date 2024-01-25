@@ -55,10 +55,10 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("disconnected");
   });
-  socket.on("create-room", async (roomName, userId) => {
-    console.log("create-room", roomName, userId);
+  socket.on("create-room", async (userId) => {
+    console.log("create-room", userId);
     const room = await Room.create({
-      roomName: roomName,
+      numberOfPeople: 1,
     });
     const user = await User.findByPk(userId);
     // await user.setRoom(room);
@@ -79,7 +79,7 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5000;
 const connectDB = async () => {
   try {
-      const result = await sequelize.sync();
+      const result = await sequelize.sync({ force: true});
       console.log('DB Connection has been established successfully.');
        
     app.listen(PORT, () => {
