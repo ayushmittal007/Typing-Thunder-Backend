@@ -80,10 +80,10 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5000;
 const connectDB = async () => {
   try {
-      const result = await sequelize.sync({ force: true});
+      const result = await sequelize.sync({});
       console.log('DB Connection has been established successfully.');
        
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
