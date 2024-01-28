@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { errorMiddleware } = require("./middlewares/errorHandling");
+const { initializeSocket } = require("./config/sockets");
 require("dotenv").config();
 
 const app = express();
@@ -14,18 +15,7 @@ app.use(
 );
 
 const server = http.createServer(app);
-const { Server } = require("socket.io");
-// const io = new Server(server);
-
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-  },
-  connectionStateRecovery: {},
-});
+initializeSocket(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +24,7 @@ app.use(errorMiddleware);
 
 const { sequelize } = require("./config/database");
 
-const { authRouter , userRouter , GoogleAuthRouter } = require("./routes");
+const { authRouter, userRouter, GoogleAuthRouter } = require("./routes");
 
 app.use("/api/auth", authRouter, errorMiddleware);
 app.use("/api/user", userRouter, errorMiddleware);
@@ -43,46 +33,24 @@ app.use("/api/google", (req, res, next) => {
   next();
 }, GoogleAuthRouter, errorMiddleware);
 
-const { User, Performance , Room } = require("./models");
+const { User, Performance, Room } = require("./models");
 
 User.hasMany(Performance, { as: 'performances' });
 Performance.belongsTo(User);
 Room.hasMany(User, { as: 'users' });
 User.belongsTo(Room);
 
-io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("disconnect", () => {
-    console.log("disconnected");
-  });
-  socket.on("create-room", async (userId) => {
-    console.log("create-room", userId);
-    const room = await Room.create({
-      numberOfPeople: 1,
-    });
-    const user = await User.findByPk(userId);
-
-    // await user.setRoom(room);
-    socket.join(room.roomCode);
-    socket.emit("room-created", room.roomCode);
-  });
-  socket.on("join-room", async (roomCode, userId) => {
-    console.log("join-room", roomCode, userId);
-    socket.join(roomCode);
-    socket.to(roomCode).emit("user-connected", userId);
-    socket.on("disconnect", () => {
-      socket.to(roomCode).emit("user-disconnected", userId);
-    });
-  });
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
 
 const PORT = process.env.PORT || 5000;
 const connectDB = async () => {
   try {
-      const result = await sequelize.sync({});
-      console.log('DB Connection has been established successfully.');
-       
+    const result = await sequelize.sync({});
+    console.log('DB Connection has been established successfully.');
+
     server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

@@ -13,6 +13,14 @@ const Room = sequelize.define('room', {
         type: Sequelize.STRING,
         defaultValue: shortId.generate
     },
+    leaderId : {
+        type: Sequelize.BIGINT,
+        allowNull: false
+    },
+    numberofReadyPeople : {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+    },
     numberOfPeople : {
         type: Sequelize.INTEGER,
         defaultValue: 0
