@@ -1,7 +1,6 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const { User, Room } = require("../models");
-const { ErrorHandler } = require("../middlewares/errorHandling");
 
 const initializeSocket = (server) => {
   const io = new Server(server, {
@@ -24,12 +23,15 @@ const initializeSocket = (server) => {
     socket.on("create-room", async (token) => {
       try {
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
-        if (!verified) {
-          return next(new ErrorHandler(400, "Invalid Token"));
+        if (!verified || !verified.id) {
+          // console.log("Invalid Token");
+          socket.emit("custom-error", "Invalid Token");
+          return;
         }
         const user = await User.findOne({ where: { _id: verified.id } });
         if (!user) {
-          return next(new ErrorHandler(400, "No user exists with this token"));
+          socket.emit("custom-error", "No user exists with this token");
+          return ;
         }
         const userId = user._id;
 
@@ -48,30 +50,38 @@ const initializeSocket = (server) => {
     socket.on("join-room", async (roomCode, token) => {
       try {
         if (!roomCode) {
-          return next(new ErrorHandler(400, "Room Code is required"));
-        }
-
-        const room = await Room.findOne({ where: { roomCode } });
-        if (!room) {
-          return next(new ErrorHandler(400, "No room exists with this code"));
-        }
-
-        const numberOfPeople = room.numberOfPeople + 1;
-        await Room.update({ numberOfPeople }, { where: { roomCode } });
-
-        if (numberOfPeople > 4) {
-          return next(new ErrorHandler(400, "Room is full"));
+          socket.emit("custom-error", "Room Code is required");
+          return ;
         }
 
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified) {
-          return next(new ErrorHandler(400, "Invalid Token"));
+          socket.emit("custom-error", "Invalid Token");
+          return;
         }
 
         const user = await User.findOne({ where: { _id: verified.id } });
         if (!user) {
-          return next(new ErrorHandler(400, "No user exists with this token"));
+          socket.emit("custom-error", "No user exists with this token");
+          return;
         }
+
+        const room = await Room.findOne({ where: { roomCode } });
+        if (!room) {
+          console.log("No room exists with this code");
+          socket.emit("custom-error", "No room exists with this code");
+          return;
+        }
+
+        let numberOfPeople = room.numberOfPeople;
+
+        if (numberOfPeople == 4) {
+          socket.emit("custom-error", "Room is full");
+          return;
+        }
+
+        numberOfPeople = room.numberOfPeople + 1;
+        await Room.update({ numberOfPeople }, { where: { roomCode } });
 
         const userId = user._id;
         console.log("join-room", roomCode, userId);
@@ -91,17 +101,20 @@ const initializeSocket = (server) => {
         try {
             const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
             if (!verified) {
-            return next(new ErrorHandler(400, "Invalid Token"));
+              socket.emit("custom-error", "Invalid Token");
+              return;
             }
             const user = await User.findOne({ where: { _id: verified.id } });
             if (!user) {
-            return next(new ErrorHandler(400, "No user exists with this token"));
+              socket.emit("custom-error", "No user exists with this token");
+              return;
             }
             const userId = user._id;
             
             const room = await Room.findOne({ where: { roomCode } });
             if (!room) {
-            return next(new ErrorHandler(400, "No room exists with this code"));
+              socket.emit("custom-error", "No room exists with this code");
+              return;
             }
 
             const numberOfReadyPeople = room.numberOfReadyPeople + 1;
@@ -118,12 +131,14 @@ const initializeSocket = (server) => {
         try {
             const room = await Room.findOne({ where: { roomCode } });
             if (!room) {
-            return next(new ErrorHandler(400, "No room exists with this code"));
+              socket.emit("custom-error", "No room exists with this code");
+              return;
             }
     
             const numberOfPeople = room.numberOfPeople;
             if (numberOfPeople < 2) {
-            return next(new ErrorHandler(400, "Not enough players"));
+              socket.emit("custom-error", "Not enough players");
+              return;
             }
     
             socket.to(roomCode).emit("success-start-game");
