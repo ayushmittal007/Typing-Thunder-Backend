@@ -24,28 +24,32 @@ const initializeSocket = (server) => {
       try {
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified || !verified.id) {
-          // console.log("Invalid Token");
+          console.log("Invalid Token");
           socket.emit("custom-error", "Invalid Token");
           return;
         }
+    
         const user = await User.findOne({ where: { _id: verified.id } });
         if (!user) {
           socket.emit("custom-error", "No user exists with this token");
-          return ;
+          return;
         }
+    
         const userId = user._id;
-
+    
         const room = await Room.create({
           leaderId: userId,
           numberOfPeople: 1,
         });
-
+    
         socket.join(room.roomCode);
         socket.emit("room-created", room.roomCode);
       } catch (error) {
         console.error("Error creating room:", error);
+        socket.emit("custom-error", "Error creating room");
       }
     });
+    
 
     socket.on("join-room", async (roomCode, token) => {
       try {
