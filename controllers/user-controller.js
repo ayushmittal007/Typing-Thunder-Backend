@@ -5,9 +5,11 @@ const {  performanceSchema } = require("../utils/joi_validations");
 const getRandomText = async (req, res, next) => {
     try{
         const words = ['apple', 'book', 'cat', 'dog', 'and', 'flower', 'guitar', 'house', 'island', 'jungle', 'king', 'lion', 'mountain', 'notebook', 'ocean', 'pencil', 'queen', 'river', 'sun', 'tree', 'umbrella', 'vase', 'water', 'the', 'yacht', 'zebra', 'airplane', 'ball', 'car', 'dolphin', 'ear', 'fire', 'garden', 'hat', 'the', 'icecream', 'jacket', 'key', 'lemon', 'moon', 'nest', 'orange', 'piano', 'quilt', 'rain', 'star', 'table', 'unicorn', 'volcano', 'window', 'more', 'yogurt', 'the', 'ant', 'bee', 'caterpillar', 'duck', 'elephant', 'fish', 'giraffe', 'horse', 'insect', 'jellyfish', 'kangaroo', 'lion', 'monkey', 'nightingale', 'octopus', 'penguin', 'quail', 'rabbit', 'snake', 'tiger', 'umbrella', 'vulture', 'whale', 'the', 'yak', 'zebra', 'apple', 'banana', 'cherry', 'date', 'eggplant', 'fig', 'grape', 'honeydew', 'the', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear', 'quince', 'raspberry', 'a', 'tomato', 'more', 'vanilla', 'watermelon' , 'apple', 'book', 'cat', 'dog', 'and', 'flower', 'guitar', 'house', 'island', 'jungle', 'king', 'lion', 'mountain', 'notebook', 'ocean', 'pencil', 'queen', 'river', 'sun', 'tree', 'umbrella', 'vase', 'water', 'the', 'yacht', 'zebra', 'airplane', 'ball', 'car', 'dolphin', 'ear', 'fire', 'garden', 'hat', 'the', 'icecream', 'jacket', 'key', 'lemon', 'moon', 'nest', 'orange', 'piano', 'quilt', 'rain', 'star', 'table', 'unicorn', 'volcano', 'window', 'more', 'yogurt', 'the', 'ant', 'bee', 'caterpillar', 'duck', 'elephant', 'fish', 'giraffe', 'horse', 'insect', 'jellyfish', 'kangaroo', 'lion', 'monkey', 'nightingale', 'octopus', 'penguin', 'quail', 'rabbit', 'snake', 'tiger', 'umbrella', 'vulture', 'whale', 'the', 'yak', 'zebra', 'apple', 'banana', 'cherry', 'date', 'eggplant', 'fig', 'grape', 'honeydew', 'the', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear', 'quince', 'raspberry', 'a', 'tomato', 'more', 'vanilla', 'watermelon' , 'apple', 'book', 'cat', 'dog', 'and', 'flower', 'guitar', 'house', 'island', 'jungle', 'king', 'lion', 'mountain', 'notebook', 'ocean', 'pencil', 'queen', 'river', 'sun', 'tree', 'umbrella', 'vase', 'water', 'the', 'yacht', 'zebra', 'airplane', 'ball', 'car', 'dolphin', 'ear', 'fire', 'garden', 'hat', 'the', 'icecream', 'jacket', 'key', 'lemon', 'moon', 'nest', 'orange', 'piano', 'quilt', 'rain', 'star', 'table', 'unicorn', 'volcano', 'window', 'more', 'yogurt', 'the', 'ant', 'bee', 'caterpillar', 'duck', 'elephant', 'fish', 'giraffe', 'horse', 'insect', 'jellyfish', 'kangaroo', 'lion', 'monkey', 'nightingale', 'octopus', 'penguin', 'quail', 'rabbit', 'snake', 'tiger', 'umbrella', 'vulture', 'whale', 'the', 'yak', 'zebra', 'apple', 'banana', 'cherry', 'date', 'eggplant', 'fig', 'grape', 'honeydew', 'the', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear', 'quince', 'raspberry', 'a', 'tomato', 'more', 'vanilla', 'watermelon' , 'apple', 'book', 'cat', 'dog', 'and', 'flower', 'guitar', 'house', 'island', 'jungle', 'king', 'lion', 'mountain', 'notebook', 'ocean', 'pencil', 'queen', 'river', 'sun', 'tree', 'umbrella', 'vase', 'water', 'the', 'yacht', 'zebra', 'airplane', 'ball', 'car', 'dolphin', 'ear', 'fire', 'garden', 'hat', 'the', 'icecream', 'jacket', 'key', 'lemon', 'moon', 'nest', 'orange', 'piano', 'quilt', 'rain', 'star', 'table', 'unicorn', 'volcano', 'window', 'more', 'yogurt', 'the', 'ant', 'bee', 'caterpillar', 'duck', 'elephant', 'fish', 'giraffe', 'horse', 'insect', 'jellyfish', 'kangaroo', 'lion', 'monkey', 'nightingale', 'octopus', 'penguin', 'quail', 'rabbit', 'snake', 'tiger', 'umbrella', 'vulture', 'whale', 'the', 'yak', 'zebra', 'apple', 'banana', 'cherry', 'date', 'eggplant', 'fig', 'grape', 'honeydew', 'the', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear', 'quince', 'raspberry', 'a', 'tomato', 'more', 'vanilla', 'watermelon' , 'apple', 'book', 'cat', 'dog', 'and', 'flower', 'guitar', 'house', 'island', 'jungle', 'king', 'lion', 'mountain', 'notebook', 'ocean', 'pencil', 'queen', 'river', 'sun', 'tree', 'umbrella', 'vase', 'water', 'the', 'yacht', 'zebra', 'airplane', 'ball', 'car', 'dolphin', 'ear', 'fire', 'garden', 'hat', 'the', 'icecream', 'jacket', 'key', 'lemon', 'moon', 'nest', 'orange', 'piano', 'quilt', 'rain', 'star', 'table', 'unicorn', 'volcano', 'window', 'more', 'yogurt', 'the', 'ant', 'bee', 'caterpillar', 'duck', 'elephant', 'fish', 'giraffe', 'horse', 'insect', 'jellyfish', 'kangaroo', 'lion', 'monkey', 'nightingale', 'octopus', 'penguin', 'quail', 'rabbit', 'snake', 'tiger', 'umbrella', 'vulture', 'whale', 'the', 'yak', 'zebra', 'apple', 'banana', 'cherry', 'date', 'eggplant', 'fig', 'grape', 'honeydew', 'the', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'pear', 'quince', 'raspberry', 'a', 'tomato', 'more', 'vanilla', 'watermelon'];
-        const startIndex = Math.floor(Math.random() * ( words.length - 50)); 
-        const endIndex = startIndex + 50;
-        const text = words.slice(startIndex, endIndex);
+        
+        const text = [];
+        for(i=0;i<50;i++){
+            text.push(words[Math.floor(Math.random() * words.length)]);
+        }
         res.status(200).json({
             success : true,
             text : text
@@ -20,13 +22,16 @@ const getRandomText = async (req, res, next) => {
 const getRandomTextIncludingPunctuation = async (req, res, next) => {
     try{
         const punctuations = ["The", "people", "with", "ideas", "have", "no", "power", "and", "the", "people", "with", "power", "have", "no", "ideas", ".","You", "must", "take", "life", "the", "way", "it", "comes", "at", "you", "and", "make", "the", "best", "of", "it", ".","If", "you", "don't", "know", "what", "you", "want", ",", "how", "are", "you", "going", "to", "know", "when", "you", "get", "it", "?","If", "you", "have", "to", "ask", ",", "you", "will", "never", "know", ".", "If", "you", "know", ",", "you", "need", "only", "ask", ".","Your", "memory", "is", "the", "glue", "that", "binds", "your", "life", "together", ".","I'm", "sure", "there", "are", "things", "you", "know", "that", "you", "don't", "even", "know", "you", "know", ".","You", "can't", "use", "the", "fire", "exit", "because", "you're", "not", "made", "of", "fire", ".","The", "person", "that", "has", "the", "most", "to", "do", "with", "what", "happens", "to", "you", "is", "you", "!" , "The", "people", "with", "ideas", "have", "no", "power", "and", "the", "people", "with", "power", "have", "no", "ideas", ".","You", "must", "take", "life", "the", "way", "it", "comes", "at", "you", "and", "make", "the", "best", "of", "it", ".","If", "you", "don't", "know", "what", "you", "want", ",", "how", "are", "you", "going", "to", "know", "when", "you", "get", "it", "?","If", "you", "have", "to", "ask", ",", "you", "will", "never", "know", ".", "If", "you", "know", ",", "you", "need", "only", "ask", ".","Your", "memory", "is", "the", "glue", "that", "binds", "your", "life", "together", ".","I'm", "sure", "there", "are", "things", "you", "know", "that", "you", "don't", "even", "know", "you", "know", ".","You", "can't", "use", "the", "fire", "exit", "because", "you're", "not", "made", "of", "fire", ".","The", "person", "that", "has", "the", "most", "to", "do", "with", "what", "happens", "to", "you", "is", "you", "!"]
-        const startIndex = Math.floor(Math.random() * ( punctuations.length - 50));
-        const endIndex = startIndex + 50;
-        while(punctuations[startIndex] == "." || punctuations[startIndex] == "," || 
-        punctuations[startIndex] == "!" ||  punctuations[startIndex] == "?"){
-            startIndex++;
+        
+        const text = [];
+        for(i=0;i<50;i++){
+            const randomIndex = Math.floor(Math.random() * punctuations.length);
+            if(i==0 && (punctuations[randomIndex] == "." || punctuations[randomIndex] == "," ||
+            punctuations[randomIndex] == "!" || punctuations[randomIndex] == "?")){
+                continue;
+            }
+            text.push(punctuations[randomIndex]);
         }
-        const text = punctuations.slice(startIndex, endIndex);
         res.status(200).json({
             success : true,
             text : text
@@ -35,6 +40,14 @@ const getRandomTextIncludingPunctuation = async (req, res, next) => {
         next(err)
     }
 }
+
+// const getRandomTextIncludingNumbers = async (req, res, next) => {
+//     try{
+        
+//     }catch(err){
+//         next(err)
+//     }
+// }
 
 const updateUsername = async (req, res, next) => {
     try{
