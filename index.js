@@ -15,7 +15,7 @@ app.use(
 );
 
 const server = http.createServer(app);
-// initializeSocket(server);
+initializeSocket(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -43,7 +43,6 @@ User.belongsTo(Room);
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-
 
 const PORT = process.env.PORT || 5000;
 const connectDB = async () => {

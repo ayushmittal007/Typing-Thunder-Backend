@@ -1,9 +1,6 @@
 const { Server } = require("socket.io");
-const { Redis } = require("ioredis");
 const jwt = require("jsonwebtoken");
 const { User, Room } = require("../models");
-
-const client = new Redis();
 
 const initializeSocket = (server) => {
   const io = new Server(server, {
@@ -39,13 +36,10 @@ const initializeSocket = (server) => {
         }
 
         const userId = user._id;
-
         const room = await Room.create({
           leaderId: userId,
           numberOfPeople: 1,
         });
-
-        await client.set(room.roomCode, JSON.stringify(room));
 
         socket.join(room.roomCode);
         socket.emit("room-created", room.roomCode);
@@ -74,14 +68,10 @@ const initializeSocket = (server) => {
           return;
         }
 
-        let room = JSON.parse(await client.get(roomCode));
-
+        const room = Room.findOne({ where: { roomCode } });
         if (!room) {
-          room = await Room.findOne({ where: { roomCode } });
-
-          if (room) {
-            await client.set(room.roomCode, JSON.stringify(room));
-          }
+          socket.emit("custom-error", "Room does not exist");
+          return;
         }
 
         let numberOfPeople = room.numberOfPeople;
@@ -122,14 +112,10 @@ const initializeSocket = (server) => {
         }
         const userId = user._id;
 
-        let room = JSON.parse(await client.get(roomCode));
-
-        if (!room) {
-          room = await Room.findOne({ where: { roomCode } });
-
-          if (room) {
-            await client.set(room.roomCode, JSON.stringify(room));
-          }
+        const room = await Room.findOne({ where: { roomCode } });
+        if(!room){
+          socket.emit("custom-error", "Room does not exist");
+          return;
         }
 
         const numberOfReadyPeople = room.numberOfReadyPeople + 1;
@@ -145,14 +131,10 @@ const initializeSocket = (server) => {
     socket.on("start-game", async (roomCode) => {
       try {
         
-        let room = JSON.parse(await client.get(roomCode));
-
-        if (!room) {
-          room = await Room.findOne({ where: { roomCode } });
-
-          if (room) {
-            await client.set(room.roomCode, JSON.stringify(room));
-          }
+        const room = await Room.findOne({ where: { roomCode } });
+        if(!room){
+          socket.emit("custom-error", "Room does not exist");
+          return;
         }
 
         const numberOfPeople = room.numberOfPeople;
@@ -181,14 +163,10 @@ const initializeSocket = (server) => {
         }
         const userId = user._id;
 
-        let room = JSON.parse(await client.get(roomCode));
-
-        if (!room) {
-          room = await Room.findOne({ where: { roomCode } });
-
-          if (room) {
-            await client.set(room.roomCode, JSON.stringify(room));
-          }
+        const room = await Room.findOne({ where: { roomCode } });
+        if(!room){
+          socket.emit("custom-error", "Room does not exist");
+          return;
         }
 
         const userPosition = position;
