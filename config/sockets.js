@@ -68,13 +68,14 @@ const initializeSocket = (server) => {
           return;
         }
 
-        const room = Room.findOne({ where: { roomCode } });
+        const room = await Room.findOne({ where: { roomCode } });
         if (!room) {
           socket.emit("custom-error", "Room does not exist");
           return;
         }
 
         let numberOfPeople = room.numberOfPeople;
+        console.log("Number of people:", numberOfPeople);
 
         if (numberOfPeople == 4) {
           socket.emit("custom-error", "Room is full");
@@ -82,6 +83,7 @@ const initializeSocket = (server) => {
         }
 
         numberOfPeople = room.numberOfPeople + 1;
+        // await Room.update({ numberOfPeople }, { where: { roomCode } });
         await Room.update({ numberOfPeople }, { where: { roomCode } });
 
         const userId = user._id;
@@ -89,7 +91,7 @@ const initializeSocket = (server) => {
 
         socket.join(roomCode);
         socket.to(roomCode).emit("user-connected", userId);
-
+        
         socket.on("disconnect", () => {
           socket.to(roomCode).emit("user-disconnected", userId);
         });
