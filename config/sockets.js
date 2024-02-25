@@ -13,15 +13,56 @@ const initializeSocket = (server) => {
     connectionStateRecovery: {},
   });
 
-  io.on("connection", (socket) => {
-    console.log("a user connected");
+  io.on("connection", async (socket) => {
+    try{
+      const token = socket.handshake.auth.token;
+      const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+      if (!verified) {
+        console.log("Invalid Token");
+        socket.emit("custom-error", "Invalid Token");
+        return;
+      }
 
-    socket.on("disconnect", () => {
+      const user = await User.findOne({ where: { _id: verified.id } });
+      if (!user) {
+        socket.emit("custom-error", "No user exists with this token");
+        return;
+      }
+
+      console.log("a user connected");
+      socket.authToken = token;
+    }catch (err){
+      console.log("Error:", err);
+      socket.emit("custom-error", "Error connecting to the server");
+    }
+    
+    socket.on("disconnect", async () => {
+      const token = socket.handshake.auth.token;
+      const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+      if (!verified) {
+        console.log("Invalid Token");
+        socket.emit("custom-error", "Invalid Token");
+        return;
+      }
+      console.log(token);
+      const user = await User.findOne({ where: { _id: verified.id } });
+
+      const newUser = await User.update({ roomId: null }, { where: { _id: user._id } });
+      const room = await Room.findOne({ where: { leaderId: user._id } });
+      if(room){
+        await Room.destroy({ where: { leaderId: user._id } });
+        socket.to(room.roomCode).emit("ending-game" , "Leader Ended the Game...");
+      }
+      
+      console.log("user-disconnected" , user.username);
+      socket.emit('user-disconnected' , user.username);
       console.log("disconnected");
     });
 
-    socket.on("create-room", async (token) => {
+    socket.on("create-room", async () => {
       try {
+
+        const token = socket.authToken;
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified || !verified.id) {
           console.log("Invalid Token");
@@ -41,6 +82,9 @@ const initializeSocket = (server) => {
           numberOfPeople: 1,
         });
 
+        await User.update({ roomId: room.id }, { where: { _id: user._id } });
+
+        // console.log("Room created:", socket.temp);
         socket.join(room.roomCode);
         socket.emit("room-created", room.roomCode);
       } catch (error) {
@@ -49,8 +93,9 @@ const initializeSocket = (server) => {
       }
     });
 
-    socket.on("join-room", async (roomCode, token) => {
+    socket.on("join-room", async (roomCode) => {
       try {
+        const token = socket.authToken;
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified) {
           socket.emit("custom-error", "Invalid Token");
@@ -68,16 +113,15 @@ const initializeSocket = (server) => {
           return;
         }
 
-        // Check if user is already in the room
-        const isUserInRoom = await room.hasUser(user);
-        if (isUserInRoom) {
-          socket.emit("custom-error", "User is already in the room");
-          return;
-        }
-
         const room = await Room.findOne({ where: { roomCode } });
         if (!room) {
           socket.emit("custom-error", "Room does not exist");
+          return;
+        }
+
+        if(user.roomId == room.id){
+          console.log("User is already in the room");
+          socket.emit("custom-error", "User is already in the room");
           return;
         }
 
@@ -89,6 +133,7 @@ const initializeSocket = (server) => {
           return;
         }
 
+        const newUser = await User.update({ roomId: room.id }, { where: { _id: user._id } });
         numberOfPeople = room.numberOfPeople + 1;
         
         await Room.update({ numberOfPeople }, { where: { roomCode } });
@@ -100,9 +145,10 @@ const initializeSocket = (server) => {
         socket.to(roomCode).emit("user-connected", userId);
         socket.emit("room-joined", roomCode);
         
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
           numberOfPeople = room.numberOfPeople - 1;
-          Room.update({ numberOfPeople }, { where: { roomCode } });
+          const updatedRoom = await Room.update({ numberOfPeople }, { where: { roomCode } });
+          const newUser = await User.update({ roomId: null }, { where: { _id: user._id } });
           socket.to(roomCode).emit("user-disconnected", userId);
         });
       } catch (error) {
@@ -110,8 +156,9 @@ const initializeSocket = (server) => {
       }
     });
 
-    socket.on("ready", async (roomCode, token) => {
+    socket.on("start-game", async (roomCode) => {
       try {
+        const token = socket.authToken;
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified) {
           socket.emit("custom-error", "Invalid Token");
@@ -130,39 +177,55 @@ const initializeSocket = (server) => {
           return;
         }
 
-        const numberOfReadyPeople = room.numberOfReadyPeople + 1;
-        await Room.update({ numberOfReadyPeople }, { where: { roomCode } });
-        if (numberOfReadyPeople == room.numberOfPeople) {
-          socket.to(roomCode).emit("start-game");
+        if(room.leaderId != userId){
+          socket.emit("custom-error", "User is not the leader");
+          return;
         }
+
+        socket.to(roomCode).emit("starting-game" , "Leader Wants to Start Game...");
       } catch (error) {
-        console.error("Error readying up:", error);
+        console.error("Error starting game:", error);
       }
     });
 
-    socket.on("start-game", async (roomCode) => {
+    socket.on("ready", async (roomCode) => {
       try {
-        
+        const token = socket.authToken;
+        const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        if (!verified) {
+          socket.emit("custom-error", "Invalid Token");
+          return;
+        }
+        const user = await User.findOne({ where: { _id: verified.id } });
+        if (!user) {
+          socket.emit("custom-error", "No user exists with this token");
+          return;
+        }
+        const userId = user._id;
+
         const room = await Room.findOne({ where: { roomCode } });
         if(!room){
           socket.emit("custom-error", "Room does not exist");
           return;
         }
 
-        const numberOfPeople = room.numberOfPeople;
-        if (numberOfPeople < 2) {
-          socket.emit("custom-error", "Not enough players");
+        const userReady = user.isReady;
+        if(userReady){
+          socket.emit("custom-error", "User is already ready");
           return;
         }
 
-        socket.to(roomCode).emit("success-start-game");
+        const updatedUser = await User.update({ isReady: true }, { where: { _id: user._id } });
+        socket.to(roomCode).emit("user-ready", user.username , "is ready"); 
+        
       } catch (error) {
-        console.error("Error starting game:", error);
+        console.error("Error readying up:", error);
       }
     });
 
-    socket.on("get-position", async (roomCode, token , position) => {
+    socket.on("update-position", async (roomCode , position) => {
       try {
+        const token = socket.authToken;
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified) {
           socket.emit("custom-error", "Invalid Token");
@@ -186,9 +249,42 @@ const initializeSocket = (server) => {
         socket.to(roomCode).emit("user-position", user.username ,userPosition);
 
       } catch (error) {
-        console.error("Error getting position:", error);
+        console.error("Error updating position:", error);
       }
     });
+
+    socket.on("end-game", async (roomCode) => {
+      try {
+        const token = socket.authToken;
+        const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        if (!verified) {
+          socket.emit("custom-error", "Invalid Token");
+          return;
+        }
+        const user = await User.findOne({ where: { _id: verified.id } });
+        if (!user) {
+          socket.emit("custom-error", "No user exists with this token");
+          return;
+        }
+        const userId = user._id;
+
+        const room = await Room.findOne({ where: { roomCode } });
+        if(!room){
+          socket.emit("custom-error", "Room does not exist");
+          return;
+        }
+
+        if(room.leaderId != userId){
+          socket.emit("custom-error", "User is not the leader");
+          return;
+        }
+
+        socket.to(roomCode).emit("ending-game" , "Leader Wants to End Game...");
+      } catch (error) {
+        console.error("Error ending game:", error);
+      }
+    });
+
   });
 };
 

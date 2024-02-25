@@ -28,7 +28,15 @@ const User = sequelize.define('user', {
     isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
-    }
+    },
+    isReady : {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+    },
+    position: {
+        type: Sequelize.STRING,
+        defaultValue: null
+    },
 });
 
 module.exports = User;
