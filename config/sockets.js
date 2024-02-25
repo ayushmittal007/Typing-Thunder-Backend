@@ -342,6 +342,33 @@ const initializeSocket = (server) => {
         console.error("Error ending room:", error);
       }
     });
+
+    socket.on("chat-message", async (roomCode, message) => {
+      try {
+        const token = socket.authToken;
+        const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        if (!verified) {
+          socket.emit("custom-error", "Invalid Token");
+          return;
+        }
+        const user = await User.findOne({ where: { _id: verified.id } });
+        if (!user) {
+          socket.emit("custom-error", "No user exists with this token");
+          return;
+        }
+        const userId = user._id;
+
+        const room = await Room.findOne({ where: { roomCode } });
+        if(!room){
+          socket.emit("custom-error", "Room does not exist");
+          return;
+        }
+
+        io.to(roomCode).emit("sent-message", user.username, message);
+      } catch (error) {
+        console.error("Error sending chat message:", error);
+      }
+    });
   });
 };
 
