@@ -17,6 +17,10 @@ const Room = sequelize.define('room', {
         type: Sequelize.BIGINT,
         allowNull: false
     },
+    isGameStarted : {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+    },
     numberofReadyPeople : {
         type: Sequelize.INTEGER,
         defaultValue: 0
