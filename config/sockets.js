@@ -15,7 +15,9 @@ const initializeSocket = (server) => {
 
   io.on("connection", async (socket) => {
     try{
-      const token = socket.handshake.auth.token;
+      let token = socket.handshake.auth.token;
+      token = token.trim();
+      console.log("Token:", token);
       socket.authToken = token;
       const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
       if (!verified) {
@@ -39,7 +41,6 @@ const initializeSocket = (server) => {
     
     socket.on("create-room", async () => {
       try {
-
         const token = socket.authToken;
         const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
         if (!verified || !verified.id) {
