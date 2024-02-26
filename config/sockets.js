@@ -86,7 +86,7 @@ const initializeSocket = (server) => {
           socket.emit("custom-error", "No user exists with this token");
           return;
         }
-
+        
         if (!roomCode) {
           socket.emit("custom-error", "Room Code is required");
           return;
@@ -99,7 +99,6 @@ const initializeSocket = (server) => {
         }
 
         console.log("User:", user.roomId, "Room:", room._id);
-
         if(user.roomId == room._id){
           console.log("User is already in the room");
           socket.emit("custom-error", "User is already in the room");
@@ -245,6 +244,9 @@ const initializeSocket = (server) => {
           return;
         }
         const userId = user._id;
+        user.isReady = false;
+        user.position = null;
+        await user.save();
 
         const room = await Room.findOne({ where: { roomCode } });
         if(!room){
@@ -259,19 +261,12 @@ const initializeSocket = (server) => {
 
     socket.on("disconnect", async () => {
       const token = socket.authToken;
-      console.log("Token:", token);
-      if (!token) {
-          console.log("Token not provided");
-          // Handle the case where the token is missing
-          return;
-      }
       const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
       if (!verified) {
         console.log("Invalid Token");
         socket.emit("custom-error", "Invalid Token");
         return;
       }
-      console.log(token);
       const user = await User.findOne({ where: { _id: verified.id } });
       user.roomId = null;
       user.isReady = false;
@@ -280,7 +275,6 @@ const initializeSocket = (server) => {
 
       const room = await Room.findOne({ where: { leaderId: user._id } });
       if(room){
-
         user.isReady = false;
         user.position = null;
         await user.save();
@@ -301,6 +295,9 @@ const initializeSocket = (server) => {
       const room1 = await Room.findOne({ where: { _id: roomId } });
       if(room1){
         let numberOfPeople = room1.numberOfPeople - 1;
+        user.isReady = false;
+        user.position = null;
+        await user.save();
         await Room.update({ numberOfPeople }, { where: { _id: roomId } });
         socket.to(room1.roomCode).emit("user-disconnected", user.username);
       }
@@ -335,7 +332,9 @@ const initializeSocket = (server) => {
           socket.emit("custom-error", "User is not the leader");
           return;
         }
-
+        user.isReady = false;
+        user.position = null;
+        await user.save();
         await Room.destroy({ where: { leaderId: userId } });
         socket.to(room.roomCode).emit("ending-game" , "Leader Ended the Game...");
       } catch (error) {

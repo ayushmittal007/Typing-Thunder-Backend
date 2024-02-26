@@ -4,7 +4,6 @@ const { ErrorHandler } = require('../middlewares/errorHandling');
 
 const auth = async (req, res, next) => {
   const token = req.header('auth-token') || req.query.token;
-  console.log('Auth Token:', token);
   try {
     if (!token) {
       return next(new ErrorHandler(400, 'No authentication token, access denied.'));
