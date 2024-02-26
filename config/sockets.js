@@ -17,7 +17,6 @@ const initializeSocket = (server) => {
     try{
       const token = socket.handshake.auth.token;
       socket.authToken = token;
-      console.log("Token:", token);
       const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
       if (!verified) {
         console.log("Invalid Token");
@@ -63,7 +62,6 @@ const initializeSocket = (server) => {
 
         await User.update({ roomId: room._id }, { where: { _id: user._id } });
 
-        // console.log("Room created:", socket.temp);
         socket.join(room.roomCode);
         socket.emit("room-created", room.roomCode);
       } catch (error) {
@@ -86,7 +84,7 @@ const initializeSocket = (server) => {
           socket.emit("custom-error", "No user exists with this token");
           return;
         }
-        
+
         if (!roomCode) {
           socket.emit("custom-error", "Room Code is required");
           return;
@@ -263,7 +261,6 @@ const initializeSocket = (server) => {
       const token = socket.authToken;
       const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
       if (!verified) {
-        console.log("Invalid Token");
         socket.emit("custom-error", "Invalid Token");
         return;
       }
@@ -304,7 +301,6 @@ const initializeSocket = (server) => {
       
       console.log("user-disconnected" , user.username);
       socket.emit('user-disconnected' , user.username);
-      console.log("disconnected");
     });
 
     socket.on("end-room" , async (roomCode) => {
