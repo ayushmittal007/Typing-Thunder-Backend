@@ -121,6 +121,9 @@ const initializeSocket = (server) => {
         console.log("join-room", roomCode, userId);
 
         socket.join(roomCode);
+        const usersInRoom = await User.findAll({ where: { roomId: room._id } });
+        const usernames = usersInRoom.map((user) => user.username);
+        socket.emit("room-joined", roomCode, usernames);
         io.to(roomCode).emit("user-connected", user.username);
         
       } catch (error) {
