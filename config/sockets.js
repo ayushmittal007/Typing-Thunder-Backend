@@ -274,34 +274,41 @@ const initializeSocket = (server) => {
       user.position = null;
       await user.save();
 
-      const room = await Room.findOne({ where: { leaderId: user._id } });
-      if(room){
-        user.isReady = false;
-        user.position = null;
-        await user.save();
-        const users = await User.findAll({ where: { roomId: room._id } });
-        let newLeader;
-        for(let i = 0 ; i < users.length ; i++){
-          if(users[i]._id != user._id){
-            newLeader = users[i];
-            break;
-          }
-        }
-        await Room.update({ leaderId: newLeader._id } , { where: { _id: room._id } });
-        socket.to(room.roomCode).emit("new-leader" , newLeader.username);
-        return;
-      }
+      // const room = await Room.findOne({ where: { leaderId: user._id } });
+      // if(room){
+      //   user.isReady = false;
+      //   user.position = null;
+      //   await user.save();
+      //   const users = await User.findAll({ where: { roomId: room._id } });
+      //   let newLeader;
+      //   for(let i = 0 ; i < users.length ; i++){
+      //     if(users[i]._id != user._id){
+      //       newLeader = users[i];
+      //       break;
+      //     }
+      //   }
 
-      const roomId = user.roomId;
-      const room1 = await Room.findOne({ where: { _id: roomId } });
-      if(room1){
-        let numberOfPeople = room1.numberOfPeople - 1;
-        user.isReady = false;
-        user.position = null;
-        await user.save();
-        await Room.update({ numberOfPeople }, { where: { _id: roomId } });
-        socket.to(room1.roomCode).emit("user-disconnected", user.username);
-      }
+      //   if(!newLeader){
+      //     await Room.destroy({ where: { _id: room._id } });
+      //     socket.to(room.roomCode).emit("ending-game" , "Leader Disconnected and Game Ended...");
+      //     return;
+      //   }
+      //   console.log("New Leader:", newLeader.username);
+      //   await Room.update({ leaderId: newLeader._id } , { where: { _id: room._id } });
+      //   socket.to(room.roomCode).emit("new-leader" , newLeader.username);
+      //   return;
+      // }
+
+      // const roomId = user.roomId;
+      // const room1 = await Room.findOne({ where: { _id: roomId } });
+      // if(room1){
+      //   let numberOfPeople = room1.numberOfPeople - 1;
+      //   user.isReady = false;
+      //   user.position = null;
+      //   await user.save();
+      //   await Room.update({ numberOfPeople }, { where: { _id: roomId } });
+      //   socket.to(room1.roomCode).emit("user-disconnected", user.username);
+      // }
       
       console.log("user-disconnected" , user.username);
       socket.emit('user-disconnected' , user.username);
