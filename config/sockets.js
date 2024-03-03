@@ -125,6 +125,12 @@ const initializeSocket = (server) => {
         const userId = user._id;
         console.log("join-room", roomCode, userId);
 
+        const leader = await User.findOne({ where: { _id: room.leaderId } });
+        if(!leader){
+          socket.emit("custom-error", "Leader does not exist");
+          return;
+        }
+
         const users = await User.findAll({ where: { roomId: room._id } });
         const usernames = users.map((user) => ({
           username : user.username,
