@@ -125,44 +125,6 @@ const initializeSocket = (server) => {
         const userId = user._id;
         console.log("join-room", roomCode, userId);
 
-        socket.join(roomCode);
-        const usersInRoom = await User.findAll({ where: { roomId: room._id } });
-        const usernames = usersInRoom.map((user) => user.username);
-        socket.emit("room-joined", roomCode, usernames);
-        io.to(roomCode).emit("user-connected", user.username);
-        
-      } catch (error) {
-        console.error("Error joining room:", error);
-      }
-    });
-
-    socket.on("update-users-list" , async (roomCode) => {
-      try {
-        const token = socket.authToken;
-        const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
-        if (!verified) {
-          socket.emit("custom-error", "Invalid Token");
-          return;
-        }
-        const user = await User.findOne({ where: { _id: verified.id } });
-        if (!user) {
-          socket.emit("custom-error", "No user exists with this token");
-          return;
-        }
-        const userId = user._id;
-
-        const room = await Room.findOne({ where: { roomCode } });
-        if(!room){
-          socket.emit("custom-error", "Room does not exist");
-          return;
-        }
-
-        const leader = await User.findOne({ where: { _id: room.leaderId } });
-        if(!leader){
-          socket.emit("custom-error", "Leader does not exist");
-          return;
-        }
-
         const users = await User.findAll({ where: { roomId: room._id } });
         const usernames = users.map((user) => ({
           username : user.username,
@@ -172,9 +134,49 @@ const initializeSocket = (server) => {
         io.to(roomCode).emit("users-list", usernames);
 
       } catch (error) {
-        console.error("Error updating users list:", error);
+        console.error("Error joining room:", error);
       }
     });
+
+    // socket.on("update-users-list" , async (roomCode) => {
+    //   try {
+    //     const token = socket.authToken;
+    //     const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+    //     if (!verified) {
+    //       socket.emit("custom-error", "Invalid Token");
+    //       return;
+    //     }
+    //     const user = await User.findOne({ where: { _id: verified.id } });
+    //     if (!user) {
+    //       socket.emit("custom-error", "No user exists with this token");
+    //       return;
+    //     }
+    //     const userId = user._id;
+
+    //     const room = await Room.findOne({ where: { roomCode } });
+    //     if(!room){
+    //       socket.emit("custom-error", "Room does not exist");
+    //       return;
+    //     }
+
+    //     const leader = await User.findOne({ where: { _id: room.leaderId } });
+    //     if(!leader){
+    //       socket.emit("custom-error", "Leader does not exist");
+    //       return;
+    //     }
+
+    //     const users = await User.findAll({ where: { roomId: room._id } });
+    //     const usernames = users.map((user) => ({
+    //       username : user.username,
+    //       role : user._id == leader._id ? "Leader" : "Member"
+    //     }));
+        
+    //     io.to(roomCode).emit("users-list", usernames);
+
+    //   } catch (error) {
+    //     console.error("Error updating users list:", error);
+    //   }
+    // });
 
     socket.on("ready", async (roomCode) => {
       try {
