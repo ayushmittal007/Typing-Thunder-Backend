@@ -117,6 +117,8 @@ const initializeSocket = (server) => {
           return;
         }
 
+        socket.to(roomCode).emit("user-connected", user.username);
+
         const newUser = await User.update({ roomId: room._id }, { where: { _id: user._id } });
         numberOfPeople = room.numberOfPeople + 1;
         
@@ -136,8 +138,9 @@ const initializeSocket = (server) => {
           username : user.username,
           role : user._id == leader._id ? "Leader" : "Member"
         }));
+        console.log("Users:", usernames);
         
-        io.to(roomCode).emit("users-list", usernames);
+        socket.to(roomCode).emit("users-list", usernames);
 
       } catch (error) {
         console.error("Error joining room:", error);
