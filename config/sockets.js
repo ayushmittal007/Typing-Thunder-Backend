@@ -19,21 +19,26 @@ const initializeSocket = (server) => {
       token = token.trim();
       console.log("Token:", token);
       socket.authToken = token;
-      const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
-      if (!verified) {
-        console.log("Invalid Token");
+      try {
+        const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        if (!verified) {
+          console.log("Invalid Token");
+          socket.emit("custom-error", "Invalid Token");
+          return;
+        }
+          const user = await User.findOne({ where: { _id: verified.id } });
+          if (!user) {
+            socket.emit("custom-error", "No user exists with this token");
+            return;
+          }
+          console.log("a user connected" , user.email);
+          socket.authToken = token;
+        
+      } catch (e) {
+        console.log("Error:", "token is invalid");
         socket.emit("custom-error", "Invalid Token");
-        return;
       }
 
-      const user = await User.findOne({ where: { _id: verified.id } });
-      if (!user) {
-        socket.emit("custom-error", "No user exists with this token");
-        return;
-      }
-
-      console.log("a user connected" , user.email);
-      socket.authToken = token;
     }catch (err){
       console.log("Error:", err);
       socket.emit("custom-error", "Error connecting to the server");
@@ -262,18 +267,23 @@ const initializeSocket = (server) => {
     });
 
     socket.on("disconnect", async () => {
-      const token = socket.authToken;
-      const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
-      if (!verified) {
-        socket.emit("custom-error", "Invalid Token");
-        return;
+      try{
+        const token = socket.authToken;
+        const verified = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+        if (!verified) {
+          socket.emit("custom-error", "Invalid Token");
+          return;
+        }
+        const user = await User.findOne({ where: { _id: verified.id } });
+        user.roomId = null;
+        user.isReady = false;
+        user.position = null;
+        await user.save();
+        console.log("user-disconnected" , user.username);
+        socket.emit('user-disconnected' , user.username);
+      }catch(err){
+        console.log("Error:", err);
       }
-      const user = await User.findOne({ where: { _id: verified.id } });
-      user.roomId = null;
-      user.isReady = false;
-      user.position = null;
-      await user.save();
-
       // const room = await Room.findOne({ where: { leaderId: user._id } });
       // if(room){
       //   user.isReady = false;
@@ -309,9 +319,6 @@ const initializeSocket = (server) => {
       //   await Room.update({ numberOfPeople }, { where: { _id: roomId } });
       //   socket.to(room1.roomCode).emit("user-disconnected", user.username);
       // }
-      
-      console.log("user-disconnected" , user.username);
-      socket.emit('user-disconnected' , user.username);
     });
 
     socket.on("end-room" , async (roomCode) => {
