@@ -139,8 +139,8 @@ const initializeSocket = (server) => {
           role : user._id == leader._id ? "Leader" : "Member"
         }));
         console.log("Users:", usernames);
-        
-        socket.to(roomCode).emit("users-list", usernames);
+        socket.join(roomCode);
+        io.in(roomCode).emit("users-list", usernames);
 
       } catch (error) {
         console.error("Error joining room:", error);
@@ -436,7 +436,7 @@ const initializeSocket = (server) => {
           return;
         }
 
-        io.to(roomCode).emit("sent-message", user.username, message);
+        io.in(roomCode).emit("sent-message", user.username, message);
       } catch (error) {
         console.error("Error sending chat message:", error);
       }
