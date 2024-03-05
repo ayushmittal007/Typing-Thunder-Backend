@@ -1,4 +1,4 @@
-const { Server } = require("socket.io");
+const { Server, Socket } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const { User, Room } = require("../models");
 
@@ -217,7 +217,7 @@ const initializeSocket = (server) => {
         user.position = 0;
         await user.save();
         
-        io.to(roomCode).emit("user-ready", user.username , "is ready"); 
+        socket.to(roomCode).emit("user-ready", user.username , "is ready"); 
         
       } catch (error) {
         console.error("Error readying up:", error);
@@ -262,7 +262,7 @@ const initializeSocket = (server) => {
           }
         }
 
-        io.to(roomCode).emit("starting-game" , "Game is starting....");
+        socket.to(roomCode).emit("starting-game" , "Game is starting....");
       } catch (error) {
         console.error("Error starting game:", error);
       }
